@@ -1,9 +1,11 @@
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 public class FirstNonRepeatingCharacter {
     public static char findFirstNonRepeatingChar(String text) {
         Map<Character, Integer> frequency = new HashMap<>();
+
         for (char ch : text.toCharArray()) {
             frequency.put(ch, frequency.getOrDefault(ch, 0) + 1);
         }
@@ -15,12 +17,16 @@ public class FirstNonRepeatingCharacter {
     }
 
     public static void main(String[] args) {
-        String text = "swiss";
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter a word or sentence: ");
+        String text = scanner.nextLine();
+
         char result = findFirstNonRepeatingChar(text);
         if (result == '\0') {
             System.out.println("No Non-Repeating Character Found");
         } else {
             System.out.println("First Non-Repeating Character: '" + result + "'");
         }
+        scanner.close();
     }
 }

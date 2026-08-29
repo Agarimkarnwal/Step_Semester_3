@@ -1,4 +1,5 @@
 import java.util.Arrays;
+import java.util.Scanner;
 
 public class PalindromeChecker {
     public static boolean isPalindromeIterative(String text) {
@@ -26,10 +27,18 @@ public class PalindromeChecker {
     }
 
     public static void main(String[] args) {
-        String text = "madam";
-        System.out.println("Input: " + text);
-        System.out.println("Iterative: " + (isPalindromeIterative(text) ? "Palindrome" : "Not Palindrome"));
-        System.out.println("Recursive: " + (isPalindromeRecursive(text) ? "Palindrome" : "Not Palindrome"));
-        System.out.println("Array Reversal: " + (isPalindromeArrayReversal(text) ? "Palindrome" : "Not Palindrome"));
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter text: ");
+        String text = scanner.nextLine();
+
+        boolean iterative = isPalindromeIterative(text);
+        boolean recursive = isPalindromeRecursive(text);
+        boolean arrayReversal = isPalindromeArrayReversal(text);
+
+        System.out.println("Iterative: " + (iterative ? "Palindrome" : "Not Palindrome"));
+        System.out.println("Recursive: " + (recursive ? "Palindrome" : "Not Palindrome"));
+        System.out.println("Array Reversal: " + (arrayReversal ? "Palindrome" : "Not Palindrome"));
+        System.out.println("All approaches agree: " + (iterative == recursive && recursive == arrayReversal));
+        scanner.close();
     }
 }

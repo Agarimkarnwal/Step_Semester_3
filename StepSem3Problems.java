@@ -3,18 +3,17 @@ import java.util.Arrays;
 public class StepSem3Problems {
 
     // Problem 1
-    static void curveScores(int[] scores, int bonus) {
-        for (int i = 0; i < scores.length; i++) {
-            scores[i] += bonus;
-        }
+    static void applyMultipliers(double[] playerScores, int captainIndex, int viceCaptainIndex) {
+        playerScores[captainIndex] = playerScores[captainIndex] * 2;
+        playerScores[viceCaptainIndex] = playerScores[viceCaptainIndex] * 1.5;
     }
 
     // Problem 2
-    static String findDuplicateTeam(String[] teamNames) {
-        for (int i = 0; i < teamNames.length; i++) {
-            for (int j = i + 1; j < teamNames.length; j++) {
-                if (teamNames[i].equals(teamNames[j])) {
-                    return "Duplicate Found: " + teamNames[i];
+    static String findDuplicatePick(String[] playerNames) {
+        for (int i = 0; i < playerNames.length; i++) {
+            for (int j = i + 1; j < playerNames.length; j++) {
+                if (playerNames[i].equals(playerNames[j])) {
+                    return "Duplicate Found: " + playerNames[i];
                 }
             }
         }
@@ -22,154 +21,134 @@ public class StepSem3Problems {
     }
 
     // Problem 3
-    static int[] findTopThreeScores(int[] scores) {
-        int first = Integer.MIN_VALUE;
-        int second = Integer.MIN_VALUE;
-        int third = Integer.MIN_VALUE;
+    static String findMinMaxSpread(int[] scores) {
+        int min = scores[0];
+        int max = scores[0];
 
-        for (int score : scores) {
-            if (score >= first) {
-                third = second;
-                second = first;
-                first = score;
-            } else if (score >= second) {
-                third = second;
-                second = score;
-            } else if (score > third) {
-                third = score;
-            }
+        for (int i = 1; i < scores.length; i++) {
+            if (scores[i] < min) min = scores[i];
+            if (scores[i] > max) max = scores[i];
         }
 
-        return new int[]{first, second, third};
+        int spread = max - min;
+        return "Min: " + min + " | Max: " + max + " | Spread: " + spread;
     }
 
     // Problem 4
     private static double rowAverage(int[] row) {
         int sum = 0;
-        for (int score : row) {
-            sum += score;
+        for (int i = 0; i < row.length; i++) {
+            sum += row[i];
         }
         return (double) sum / row.length;
     }
 
-    static String classifyRows(int[][] seatingScores, int threshold) {
-        StringBuilder result = new StringBuilder();
+    static String classifyMatches(int[][] runsPerOver, int threshold) {
+        String result = "";
 
-        for (int i = 0; i < seatingScores.length; i++) {
-            double average = rowAverage(seatingScores[i]);
+        for (int i = 0; i < runsPerOver.length; i++) {
+            double average = rowAverage(runsPerOver[i]);
 
-            if (average < threshold) {
-                result.append("Row ").append(i).append(": Quiet Zone");
+            if (average >= threshold) {
+                result += "Match " + i + ": Power Surge";
             } else {
-                result.append("Row ").append(i).append(": Buzzing Zone");
+                result += "Match " + i + ": Normal";
             }
 
-            if (i < seatingScores.length - 1) {
-                result.append(" | ");
-            }
+            if (i < runsPerOver.length - 1) result += " | ";
         }
 
-        return result.toString();
+        return result;
     }
 
     // Problem 5
-    static class Candidate implements Comparable<Candidate> {
+    static class Player implements Comparable<Player> {
         private String name;
-        private double cgpa;
-        private int codingScore;
+        private int matchesPlayed;
+        private double battingAverage;
+        private boolean injured;
 
-        public Candidate(String name, double cgpa, int codingScore) {
+        public Player(String name, int matchesPlayed, double battingAverage, boolean injured) {
             this.name = name;
-            this.cgpa = cgpa;
-            this.codingScore = codingScore;
+            this.matchesPlayed = matchesPlayed;
+            this.battingAverage = battingAverage;
+            this.injured = injured;
         }
 
-        static boolean isEligible(double cgpa) {
-            return cgpa >= 8.0;
+        static boolean isDraftable(int matchesPlayed) {
+            return matchesPlayed >= 10;
         }
 
-        static boolean isEligible(double cgpa, int codingScore) {
-            return cgpa >= 6.5 && codingScore >= 60;
-        }
-
-        private double compositeScore() {
-            return cgpa * 10 + codingScore * 0.5;
+        static boolean isDraftable(int matchesPlayed, boolean injured) {
+            return matchesPlayed >= 5 && !injured;
         }
 
         @Override
-        public int compareTo(Candidate other) {
-            return Double.compare(other.compositeScore(), this.compositeScore());
+        public int compareTo(Player other) {
+            return Double.compare(other.battingAverage, this.battingAverage);
         }
 
-        @Override
-        public String toString() {
-            return name + " (" + compositeScore() + ")";
+        public String getName() {
+            return name;
         }
     }
 
-    static String shortlistAndRank(Candidate[] candidates) {
+    static String draftAndRank(Player[] players) {
         int count = 0;
 
-        for (Candidate candidate : candidates) {
-            if (Candidate.isEligible(candidate.cgpa)
-                    || Candidate.isEligible(candidate.cgpa, candidate.codingScore)) {
+        for (Player player : players) {
+            if (Player.isDraftable(player.matchesPlayed)
+                    || Player.isDraftable(player.matchesPlayed, player.injured)) {
                 count++;
             }
         }
 
-        Candidate[] shortlisted = new Candidate[count];
+        Player[] draftable = new Player[count];
         int index = 0;
 
-        for (Candidate candidate : candidates) {
-            if (Candidate.isEligible(candidate.cgpa)
-                    || Candidate.isEligible(candidate.cgpa, candidate.codingScore)) {
-                shortlisted[index++] = candidate;
+        for (Player player : players) {
+            if (Player.isDraftable(player.matchesPlayed)
+                    || Player.isDraftable(player.matchesPlayed, player.injured)) {
+                draftable[index] = player;
+                index++;
             }
         }
 
-        Arrays.sort(shortlisted);
+        Arrays.sort(draftable);
 
-        StringBuilder result = new StringBuilder();
-        for (int i = 0; i < shortlisted.length; i++) {
-            result.append(i + 1).append(". ").append(shortlisted[i]);
-
-            if (i < shortlisted.length - 1) {
-                result.append(" | ");
-            }
+        String result = "";
+        for (int i = 0; i < draftable.length; i++) {
+            result += (i + 1) + ". " + draftable[i].getName();
+            if (i < draftable.length - 1) result += " | ";
         }
 
-        return result.toString();
+        return result;
     }
 
     public static void main(String[] args) {
-        // Problem 1
-        int[] scores = {70, 85, 60};
-        curveScores(scores, 10);
+        double[] scores = {40, 55, 30, 62};
+        applyMultipliers(scores, 1, 3);
         System.out.println(Arrays.toString(scores));
 
-        // Problem 2
-        String[] teamNames = {"ByteForce", "CodeCrafters", "ByteForce"};
-        System.out.println(findDuplicateTeam(teamNames));
+        String[] playerNames = {"Kohli", "Bumrah", "Kohli", "Rohit"};
+        System.out.println(findDuplicatePick(playerNames));
 
-        // Problem 3
-        int[] podiumScores = {45, 82, 79, 90, 33, 90, 61};
-        System.out.println(Arrays.toString(findTopThreeScores(podiumScores)));
+        int[] scoresForMinMax = {45, 82, 79, 90, 33, 90, 61};
+        System.out.println(findMinMaxSpread(scoresForMinMax));
 
-        // Problem 4
-        int[][] seatingScores = {
-            {40, 50, 45},
-            {85, 90, 95},
-            {30, 20, 25}
+        int[][] runsPerOver = {
+            {4, 6, 8},
+            {10, 12, 14},
+            {2, 3, 1}
         };
-        System.out.println(classifyRows(seatingScores, 60));
+        System.out.println(classifyMatches(runsPerOver, 8));
 
-        // Problem 5
-        Candidate[] candidates = {
-            new Candidate("Aisha", 8.2, 40),
-            new Candidate("Rohit", 6.8, 65),
-            new Candidate("Meena", 6.0, 90),
-            new Candidate("Karan", 7.5, 20)
+        Player[] players = {
+            new Player("Virat", 15, 48.0, false),
+            new Player("Rahul", 7, 55.0, false),
+            new Player("Sameer", 3, 60.0, false),
+            new Player("Dev", 12, 20.0, true)
         };
-        System.out.println(shortlistAndRank(candidates));
+        System.out.println(draftAndRank(players));
     }
 }
